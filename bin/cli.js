@@ -2,6 +2,7 @@
 
 import inquirer from "inquirer";
 import chalk from "chalk";
+import fs from "fs";
 import { importCSV } from "../src/commands/importCsv.js";
 import { sendEmails } from "../src/commands/sendEmails.js";
 import { checkConfirmations } from "../src/commands/checkConfirmations.js";
@@ -15,6 +16,23 @@ import {
 } from "./components/utils.js";
 import runServer from "./components/server.js";
 import checkHealth from "./components/healthCheck.js";
+
+const viewJsonData = () => {
+  try {
+    const emailData = JSON.parse(fs.readFileSync("./data/email.json", "utf8"));
+    const confirmationData = JSON.parse(
+      fs.readFileSync("./data/confirmation.json", "utf8")
+    );
+
+    console.log("\n\u{1F4E7} Email Data:\n");
+    console.table(emailData);
+
+    console.log("\n\u{2705} Confirmation Data:\n");
+    console.table(confirmationData);
+  } catch (error) {
+    console.error("\u274C Error loading JSON files:", error.message);
+  }
+};
 
 const processCommandArgs = async () => {
   const args = process.argv.slice(2);
@@ -77,13 +95,14 @@ const main = async () => {
           choices: [
             { name: "Import CSV", value: "Import CSV" },
             { name: "Send Emails", value: "Send Emails" },
-            { name: "Check Confirmations", value: "Check Confirmations" },
+            { name: "Send Confirmation Emails", value: "Send Confirmation Emails" },
             {
               name: serverRunning
                 ? `Start Server ${chalk.green("(running)")}`
                 : "Start Server",
               value: "Start Server",
             },
+            { name: "View Email & Confirmation Data", value: "View Data" },
             { name: "Health Check", value: "Health Check" },
             { name: "Help", value: "Help" },
             { name: "Restart CLI", value: "Restart CLI" },
@@ -112,11 +131,14 @@ const main = async () => {
           spinner.stop();
           await sendEmails();
           break;
-        case "Check Confirmations":
+        case "Send Confirmation Emails":
           spinner.start("Loading confirmations...");
           await new Promise((resolve) => setTimeout(resolve, 500));
           spinner.stop();
           await checkConfirmations();
+          break;
+        case "View Data":
+          viewJsonData();
           break;
         case "Start Server":
           await runServer();
@@ -175,3 +197,4 @@ main().catch((error) => {
   console.error(chalk.red(`\nFatal error: ${error.message}`));
   process.exit(1);
 });
+
