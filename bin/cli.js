@@ -23,6 +23,7 @@ import {
 import runServer from "./components/server.js";
 import checkHealth from "./components/healthCheck.js";
 import { renderTitle } from "./components/utils.js";
+import { login } from "../cli/commands/auth.js";
 
 const showBanner = () => {
   renderTitle();
@@ -105,6 +106,16 @@ const main = async () => {
       process.exit(0);
     }
     console.clear();
+
+    console.log("🔐 Login to Availr");
+    let loggedIn = false;
+    while (!loggedIn) {
+      loggedIn = await login();
+      if (!loggedIn) {
+        console.log("🔁 Please try again.\n");
+      }
+    }
+
 
     showBanner();
     const welcomeMsg = chalkAnimation.pulse("Initialising!\n");

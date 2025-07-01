@@ -3,6 +3,8 @@ import fs from "fs";
 import { EMAIL_TEMPLATE, EMAIL_SUBJECT } from "../constants.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import { getSession } from "./auth.js";   
+
 dotenv.config();
 
 const generateToken = (name, email) => {
@@ -14,6 +16,7 @@ const generateToken = (name, email) => {
 
 export const sendEmails = async () => {
   try {
+    const { email: sender, appPassword } = getSession();
     const emails = JSON.parse(fs.readFileSync("./emails.json"));
 
     if (!Array.isArray(emails)) {
@@ -25,9 +28,10 @@ export const sendEmails = async () => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.AVAILR_EMAIL,
-        pass: process.env.AVAILR_PASS,
+        user: sender,
+        pass: appPassword,
       },
+
     });
     const failedEmails = [];
 
@@ -41,7 +45,7 @@ export const sendEmails = async () => {
         const token = generateToken(name, email);
 
         await transporter.sendMail({
-          from: process.env.AVAILR_EMAIL,
+          from: sender,
           to: email,
           subject: EMAIL_SUBJECT,
           html: EMAIL_TEMPLATE(
