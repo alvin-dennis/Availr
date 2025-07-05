@@ -2,6 +2,14 @@
 
 import inquirer from "inquirer";
 import chalk from "chalk";
+ feature/send-reminders
+import fs from "fs";
+
+import { importCSV } from "../src/commands/importCsv.js";
+import { sendEmails } from "../src/commands/sendEmails.js";
+import { checkConfirmations } from "../src/commands/checkConfirmations.js";
+import { sendReminders } from "../src/commands/sendReminders.js";
+
 import boxen from "boxen";
 import chalkAnimation from "chalk-animation";
 
@@ -12,6 +20,7 @@ import { scheduleEmail } from "../cli/commands/scheduleEmail.js";
 import { sendConfirmations } from "../cli/commands/sendConfirmations.js";
 import { checkData } from "../cli/commands/checkData.js";
 import { viewStats } from "../cli/commands/viewStats.js";
+ main
 
 import spinner from "./components/spinner.js";
 import log from "./components/logger.js";
@@ -55,6 +64,25 @@ const showServerStatus = (isRunning) => {
   console.log();
 };
 
+// 📂 View JSON Data
+const viewJsonData = () => {
+  try {
+    const emailData = JSON.parse(fs.readFileSync("./data/email.json", "utf8"));
+    const confirmationData = JSON.parse(
+      fs.readFileSync("./data/confirmation.json", "utf8")
+    );
+
+    console.log("\n📧 Email Data:\n");
+    console.table(emailData);
+
+    console.log("\n✅ Confirmation Data:\n");
+    console.table(confirmationData);
+  } catch (error) {
+    console.error("❌ Error loading JSON files:", error.message);
+  }
+};
+
+// 🛠️ Process CLI Arguments
 const processCommandArgs = async () => {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -99,13 +127,19 @@ const processCommandArgs = async () => {
   }
 };
 
+// 🚀 CLI Main Menu
 const main = async () => {
   try {
     const commandProcessed = await processCommandArgs();
     if (commandProcessed) {
       process.exit(0);
     }
+
     console.clear();
+ feature/send-reminders
+    console.log(chalk.bold.cyan("\nAVAILR CLI\n"));
+    console.log(chalk.white("Welcome to Availr!\n"));
+
 
     console.log("🔐 Login to Availr");
     let loggedIn = false;
@@ -126,8 +160,10 @@ const main = async () => {
         resolve();
       }, 2000)
     );
+ main
 
     let running = true;
+
     while (running) {
       console.clear();
 
@@ -137,8 +173,17 @@ const main = async () => {
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
+ feature/send-reminders
+      const serverStatus = serverRunning
+        ? chalk.green("online")
+        : chalk.red("offline");
+
+      console.log(chalk.bold.cyan("\nAVAILR CLI"));
+      console.log(`Server: ${serverStatus}\n`);
+
       showBanner();
       showServerStatus(serverRunning);
+ main
 
       const { action } = await inquirer.prompt([
         {
@@ -149,16 +194,22 @@ const main = async () => {
             { name: "Import CSV", value: "Import CSV" },
             { name: "Preview CSV", value: "Preview CSV" },
             { name: "Send Emails", value: "Send Emails" },
+ feature/send-reminders
+            { name: "Send Confirmation Emails", value: "Send Confirmation Emails" },
+            { name: "Send Reminder Emails", value: "Send Reminder Emails" },
+
             { name: "Schedule Emails", value: "Schedule Emails" },
             { name: "Check Data", value: "Check Data" },
             { name: "Send Confirmations", value: "Send Confirmations" },
             { name: "View Stats", value: "View Stats" },
+ main
             {
               name: serverRunning
                 ? `Start Server ${chalk.green("(running)")}`
                 : "Start Server",
               value: "Start Server",
             },
+            { name: "View Email & Confirmation Data", value: "View Data" },
             { name: "Health Check", value: "Health Check" },
             { name: "Help", value: "Help" },
             { name: "Restart CLI", value: "Restart CLI" },
@@ -182,12 +233,17 @@ const main = async () => {
             await dynamicCountdown(5, "Returning to main menu in");
           }
           break;
+
         case "Send Emails":
           spinner.start("Initializing email service...");
           await new Promise((resolve) => setTimeout(resolve, 500));
           spinner.stop();
           await sendEmails();
           break;
+
+ feature/send-reminders
+        case "Send Confirmation Emails":
+          spinner.start("Loading confirmations...");
 
         case "Preview CSV":
           try {
@@ -212,6 +268,7 @@ const main = async () => {
           break;
         case "Send Confirmations":
           spinner.start("Initializing confirmation service...");
+ main
           await new Promise((resolve) => setTimeout(resolve, 500));
           spinner.stop();
           await sendConfirmations();
@@ -228,6 +285,20 @@ const main = async () => {
           }
           break;
 
+ feature/send-reminders
+        case "Send Reminder Emails":
+          spinner.start("Preparing to send reminders...");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          spinner.stop();
+          await sendReminders();
+          break;
+
+        case "View Data":
+          viewJsonData();
+          break;
+
+
+ main
         case "Start Server":
           spinner.start("Initializing server module...");
           await new Promise((resolve) => setTimeout(resolve, 500));
@@ -235,16 +306,19 @@ const main = async () => {
           await runServer();
           await new Promise((resolve) => setTimeout(resolve, 500));
           break;
+
         case "Health Check":
           spinner.start("Initializing health check module...");
           await new Promise((resolve) => setTimeout(resolve, 500));
           spinner.stop();
           await checkHealth();
           break;
+
         case "Help":
           log.header("COMMAND REFERENCE");
           displayCommands();
           break;
+
         case "Restart CLI":
           log.warning("Restarting CLI...");
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -252,10 +326,12 @@ const main = async () => {
           running = false;
           setImmediate(() => main());
           return;
+
         case "Exit":
           await new Promise((resolve) => setTimeout(resolve, 1000));
           log.info("Goodbye!");
           process.exit(0);
+
         default:
           log.error("Unknown command. Please try again.");
       }
@@ -272,7 +348,6 @@ const main = async () => {
     }
   } catch (error) {
     console.error(chalk.red(`\nError: ${error.message}`));
-
     await dynamicCountdown(3);
     console.clear();
     main();
@@ -297,3 +372,5 @@ main().catch((error) => {
   console.error(chalk.red(`\nCritical System Error: ${error.message}`));
   process.exit(1);
 });
+
+

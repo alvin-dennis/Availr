@@ -1,0 +1,12 @@
+[
+  {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "timestamp": "2023-10-01T12:00:00Z"
+  },
+  {
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "timestamp": "2023-10-01T12:05:00Z"
+  }
+]
