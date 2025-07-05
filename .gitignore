@@ -1,3 +1,7 @@
+
+emails.json
+confirmations.json
+
 # dependencies (bun install)
 node_modules
 

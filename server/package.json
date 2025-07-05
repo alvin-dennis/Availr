@@ -1,0 +1,14 @@
+{
+  "name": "server",
+  "scripts": {
+    "start": "vercel dev",
+    "start:server": "node api/index.js",
+    "deploy": "vercel"
+  },
+  "dependencies": {
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "vercel": "^32.4.1"
+  }
+}

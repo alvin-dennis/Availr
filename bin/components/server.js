@@ -13,7 +13,7 @@ const runServer = async () => {
   console.log(
     chalk.green("🚀 Starting Availr server... (Press Ctrl+C to stop)")
   );
-  const server = exec("bun run server/index.js");
+  const server = exec("bun run server/api/index.js");
 
   server.stdout.on("data", (data) => {
     process.stdout.write(data);
