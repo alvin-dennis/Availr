@@ -16,7 +16,7 @@
     "chalk": "^5.0.0",
     "concurrently": "^9.1.2",
     "csv-parser": "^3.0.0",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.0.0",
     "figlet": "^1.8.1",
     "hono": "^4.0.0",
     "inquirer": "^9.0.0",
