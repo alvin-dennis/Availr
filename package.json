@@ -20,7 +20,7 @@
     "figlet": "^1.8.1",
     "hono": "^4.0.0",
     "inquirer": "^9.0.0",
-    "nodemailer": "^6.9.0"
+    "nodemailer": "^9.0.1"
   },
   "private": true,
   "devDependencies": {
